@@ -39,29 +39,28 @@ class ScanDelegate(DefaultDelegate):
 scanner = Scanner().withDelegate(ScanDelegate())
 
 try:
-    while 1:
-        devices = scanner.scan(2.0)
+    devices = scanner.scan(2.0)
 
-        for dev in devices:
-            ManuData = ""
-            ManuDataHex = []
-            for (adtype, desc, value) in dev.getScanData():
-                serial_no = ""
-                if (desc == "Manufacturer"):
-                    ManuData = value
+    for dev in devices:
+        ManuData = ""
+        ManuDataHex = []
+        for (adtype, desc, value) in dev.getScanData():
+            serial_no = ""
+            if (desc == "Manufacturer"):
+                ManuData = value
 
-                if (ManuData == ""):
-                    continue
+            if (ManuData == ""):
+                continue
 
-                for i, j in zip (ManuData[::2], ManuData[1::2]):
-                    ManuDataHex.append(int(i+j, 16))
+            for i, j in zip (ManuData[::2], ManuData[1::2]):
+                ManuDataHex.append(int(i+j, 16))
 
-                #Start decoding the raw Manufacturer data
-                if ((ManuDataHex[0] == 0x34) and (ManuDataHex[1] == 0x03)):
-                    serial_no = str(256*256*256*ManuDataHex[5] + 256*256*ManuDataHex[4] + 256*ManuDataHex[3] + ManuDataHex[2])
-                    print( "%s (%s), RSSI=%d dB, SN=%s" % (dev.addr, dev.addrType, dev.rssi, serial_no))
-                else:
-                    continue
+            #Start decoding the raw Manufacturer data
+            if ((ManuDataHex[0] == 0x34) and (ManuDataHex[1] == 0x03)):
+                serial_no = str(256*256*256*ManuDataHex[5] + 256*256*ManuDataHex[4] + 256*ManuDataHex[3] + ManuDataHex[2])
+                print( "%s (%s), RSSI=%d dB, SN=%s" % (dev.addr, dev.addrType, dev.rssi, serial_no))
+            else:
+                continue
 
 except DecodeErrorException:
     pass

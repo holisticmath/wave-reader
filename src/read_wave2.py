@@ -28,7 +28,7 @@ import signal
 import struct
 import sys
 import time
-
+from datetime import datetime
 
 class Wave2():
 
@@ -56,6 +56,7 @@ class Wave2():
                 if self.serial_number == _parse_serial_number(adv.getValue(btle.ScanEntry.MANUFACTURER)):
                     return adv.addr
         return None
+
 
     def connect(self, retries=1):
         tries = 0
@@ -127,17 +128,19 @@ def _argparser():
 def _main():
     args = _argparser()
     wave2 = Wave2(args.SERIAL_NUMBER)
-
     def _signal_handler(sig, frame):
         wave2.disconnect()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, _signal_handler)
 
+    wave2.connect(retries=3)
+    wave2.disconnect()
+
     while True:
         wave2.connect(retries=3)
         current_values = wave2.read()
-        print(current_values)
+        print(datetime.now(), current_values, flush=True)
         wave2.disconnect()
         time.sleep(args.SAMPLE_PERIOD)
 

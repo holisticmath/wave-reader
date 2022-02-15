@@ -1,0 +1,16 @@
+Created temporary directory: /tmp/pip-ephem-wheel-cache-en40t9lb
+Created temporary directory: /tmp/pip-req-tracker-81m64pzw
+Created requirements tracker '/tmp/pip-req-tracker-81m64pzw'
+Created temporary directory: /tmp/pip-install-q10m4rt1
+Cleaning up...
+Removed build tracker '/tmp/pip-req-tracker-81m64pzw'
+ERROR: You must give at least one requirement to install (see "pip help install")
+Exception information:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/pip/_internal/cli/base_command.py", line 143, in main
+    status = self.run(options, args)
+  File "/usr/lib/python3/dist-packages/pip/_internal/commands/install.py", line 313, in run
+    self.name, wheel_cache
+  File "/usr/lib/python3/dist-packages/pip/_internal/cli/base_command.py", line 252, in populate_requirement_set
+    '(see "pip help %(name)s")' % opts)
+pip._internal.exceptions.CommandError: You must give at least one requirement to install (see "pip help install")
