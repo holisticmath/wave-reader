@@ -28,6 +28,7 @@ import signal
 import struct
 import sys
 import time
+import logging
 from datetime import datetime
 
 class Wave2():
@@ -119,14 +120,19 @@ def _parse_serial_number(manufacturer_data):
 
 def _argparser():
     parser = argparse.ArgumentParser(prog="read_wave2", description="Script for reading current values from a 2nd Gen Wave product")
-    parser.add_argument("SERIAL_NUMBER", type=int, help="Airthings device serial number found under the magnetic backplate.")
-    parser.add_argument("SAMPLE_PERIOD", type=int, default=60, help="Time in seconds between reading the current values")
+    parser.add_argument("--SERIAL_NUMBER", type=int, help="Airthings device serial number found under the magnetic backplate.")
+    parser.add_argument("--SAMPLE_PERIOD", type=int, default=60, help="Time in seconds between reading the current values")
+    parser.add_argument("--LOGGING_LEVEL", type=str, default="INFO", help="Logging level")
     args = parser.parse_args()
     return args
 
 
 def _main():
     args = _argparser()
+    logging_level = getattr(logging, args.LOGGING_LEVEL.upper(), logging.INFO)
+    format = '%(asctime)s %(name)s %(levelname)s %(message)s'
+    logging.basicConfig(level=logging_level, format=format, filename='radon.txt')
+    logger = logging.getLogger()
     wave2 = Wave2(args.SERIAL_NUMBER)
     def _signal_handler(sig, frame):
         wave2.disconnect()
@@ -140,7 +146,7 @@ def _main():
     while True:
         wave2.connect(retries=3)
         current_values = wave2.read()
-        print(datetime.now(), current_values, flush=True)
+        logger.info(current_values)
         wave2.disconnect()
         time.sleep(args.SAMPLE_PERIOD)
 

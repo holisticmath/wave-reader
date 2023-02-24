@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "read_wave2.py", line 155, in <module>
+    _main()
+  File "read_wave2.py", line 147, in _main
+    wave2.connect(retries=3)
+  File "read_wave2.py", line 69, in connect
+    self._periph = btle.Peripheral(self.mac_addr)
+  File "/usr/local/lib/python3.7/dist-packages/bluepy/btle.py", line 391, in __init__
+    self._connect(deviceAddr, addrType, iface)
+  File "/usr/local/lib/python3.7/dist-packages/bluepy/btle.py", line 439, in _connect
+    raise BTLEDisconnectError("Failed to connect to peripheral %s, addr type: %s" % (addr, addrType), rsp)
+bluepy.btle.BTLEDisconnectError: Failed to connect to peripheral f4:60:77:74:bb:9e, addr type: public

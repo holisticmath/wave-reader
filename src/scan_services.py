@@ -22,45 +22,55 @@
 #
 # https://airthings.com
 
+import logging
 from bluepy.btle import Scanner, DefaultDelegate
-import time
-import struct
+import pandas as pd
 
 class DecodeErrorException(Exception):
-     def __init__(self, value):
-         self.value = value
-     def __str__(self):
-         return repr(self.value)
+    '''
+    represents error as a string
+    '''
+    def __init__(self, err_value):
+        self.value = err_value
+    def __str__(self):
+        return repr(self.value)
 
 class ScanDelegate(DefaultDelegate):
+    '''
+    since this class has no extra capability, it probably isn't necessary?
+    '''
     def __init__(self):
         DefaultDelegate.__init__(self)
 
 scanner = Scanner().withDelegate(ScanDelegate())
 
-try:
-    devices = scanner.scan(2.0)
+logger = logging.getLogger('bluetooth')
+logger.setLevel(logging.DEBUG)
 
+company_ids = pd.read_csv('data/Bluetooth-Company-Identifiers.csv')
+company_ids.columns = ['id','company']
+company_dict = pd.Series(company_ids.company.values,index=company_ids.id).to_dict()
+
+try:
+    devices = scanner.scan(20.0)
     for dev in devices:
         ManuData = ""
-        ManuDataHex = []
         for (adtype, desc, value) in dev.getScanData():
-            serial_no = ""
-            if (desc == "Manufacturer"):
+            if desc == "Manufacturer":
                 ManuData = value
 
-            if (ManuData == ""):
+            if ManuData == "":
                 continue
-
-            for i, j in zip (ManuData[::2], ManuData[1::2]):
-                ManuDataHex.append(int(i+j, 16))
 
             #Start decoding the raw Manufacturer data
-            if ((ManuDataHex[0] == 0x34) and (ManuDataHex[1] == 0x03)):
-                serial_no = str(256*256*256*ManuDataHex[5] + 256*256*ManuDataHex[4] + 256*ManuDataHex[3] + ManuDataHex[2])
-                print( "%s (%s), RSSI=%d dB, SN=%s" % (dev.addr, dev.addrType, dev.rssi, serial_no))
-            else:
-                continue
+            ManuDataHex = [f"{int(i+j, 16):02x}".upper() for i,j in zip(ManuData[::2], ManuData[1::2])]
+            manufacturer_bt_code = '0x'+ ''.join(ManuDataHex[0:2][::-1])
+            if manufacturer_bt_code == '0x0334': # Airthings, formerly Correntium AS
+                print('....Airthings device:')
+            print(manufacturer_bt_code, company_dict[manufacturer_bt_code])
+            serial = ''.join(ManuDataHex[2:5])
+            print( f"{dev.addr} ({dev.addrType}), RSSI={dev.rssi} dB, SN={serial}" )
 
-except DecodeErrorException:
-    pass
+
+except DecodeErrorException as e:
+    print(e)
